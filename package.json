@@ -1,5 +1,5 @@
 {
-  "name": "strings",
+  "name": "resizable-dots",
   "version": "1.0.0",
   "description": "2D space time hand interection.",
   "main": "server.js",
