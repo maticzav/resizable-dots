@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node server",
     "dev": "elm reactor",
-    "build": "elm package install | elm make src/ResizableDots.elm --output build/index.html"
+    "build": "elm package install -y && elm make src/ResizableDots.elm --output build/index.html"
   },
   "dependencies": {
     "elm": "^0.18.0",
