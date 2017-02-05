@@ -8,6 +8,7 @@ import Mouse exposing (Position)
 import Task
 import Transform exposing (..)
 import Window exposing (Size)
+import Tuple exposing (first)
 
 
 main =
@@ -66,7 +67,6 @@ type alias Model =
 type alias Bend =
     { start : Position
     , current : Position
-    , st : Position
     }
 
 
@@ -107,11 +107,16 @@ update msg ({ window, mouse, dots, bend } as model) =
 
         ClickStart pos ->
             let
+                ( start, s ) =
+                    List.filter (\( p, s ) -> isTouched p s pos) dots
+                        |> List.head
+                        |> Maybe.withDefault ( pos, 0 )
+
                 newDots =
-                    ( pos, 0 ) :: dots
+                    ( start, s ) :: (List.filter ((/=) start << first) dots)
 
                 newBend =
-                    Just (Bend pos pos pos)
+                    Just (Bend start pos)
             in
                 ( { model
                     | dots = newDots
@@ -122,15 +127,22 @@ update msg ({ window, mouse, dots, bend } as model) =
 
         ClickAt pos ->
             case bend of
-                Just { start, current, st } ->
+                Just { start, current } ->
                     let
                         ds =
-                            current.y - start.y
+                            let
+                                m =
+                                    current.x - start.x
+
+                                n =
+                                    current.y - start.y
+                            in
+                                (round << sqrt << toFloat) (m * m + n * n)
 
                         newDots =
                             List.map
                                 (\( p, s ) ->
-                                    if p == st then
+                                    if isTouched start s p then
                                         ( p, ds )
                                     else
                                         ( p, s )
@@ -138,7 +150,7 @@ update msg ({ window, mouse, dots, bend } as model) =
                                 dots
 
                         newBend =
-                            Maybe.map (\b -> Bend b.start pos b.st) bend
+                            Maybe.map (\b -> Bend b.start pos) bend
                     in
                         ( { model
                             | dots = newDots
@@ -160,6 +172,22 @@ update msg ({ window, mouse, dots, bend } as model) =
                   }
                 , Cmd.none
                 )
+
+
+
+-- HELPERS
+
+
+isTouched : Position -> Int -> Position -> Bool
+isTouched element s { x, y } =
+    let
+        m =
+            x - element.x
+
+        n =
+            y - element.y
+    in
+        (sqrt << toFloat) (m * m + n * n) <= (toFloat s)
 
 
 
