@@ -58,8 +58,8 @@ fixPosition { width, height } msg =
 
 type alias Model =
     { window : Size
-    , mouse : Position
-    , dots : List ( Position, Int )
+    , others : List ( Position, Int )
+    , bending : List ( Position, Int )
     , bend : Maybe Bend
     }
 
@@ -75,8 +75,8 @@ init =
     let
         model =
             { window = Size 0 0
-            , mouse = Position 0 0
-            , dots = []
+            , others = []
+            , bending = []
             , bend = Nothing
             }
 
@@ -98,7 +98,7 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ window, mouse, dots, bend } as model) =
+update msg ({ window, others, bending, bend } as model) =
     case msg of
         Window ws ->
             ( { model | window = ws }
@@ -107,19 +107,23 @@ update msg ({ window, mouse, dots, bend } as model) =
 
         ClickStart pos ->
             let
-                ( start, s ) =
-                    List.filter (\( p, s ) -> isTouched p s pos) dots
-                        |> List.head
-                        |> Maybe.withDefault ( pos, 0 )
+                newBending =
+                    case List.filter (\( p, s ) -> isTouched p s pos) others of
+                        [] ->
+                            [ ( pos, 0 ) ]
 
-                newDots =
-                    ( start, s ) :: (List.filter ((/=) start << first) dots)
+                        a ->
+                            a
+
+                newOthers =
+                    List.filter (\o -> not <| List.any ((==) o) newBending) others
 
                 newBend =
-                    Just (Bend start pos)
+                    Just (Bend pos pos)
             in
                 ( { model
-                    | dots = newDots
+                    | others = newOthers
+                    , bending = newBending
                     , bend = newBend
                   }
                 , Cmd.none
@@ -129,31 +133,24 @@ update msg ({ window, mouse, dots, bend } as model) =
             case bend of
                 Just { start, current } ->
                     let
-                        ds =
+                        ds st =
                             let
                                 m =
-                                    current.x - start.x
+                                    current.x - st.x
 
                                 n =
-                                    current.y - start.y
+                                    current.y - st.y
                             in
                                 (round << sqrt << toFloat) (m * m + n * n)
 
-                        newDots =
-                            List.map
-                                (\( p, s ) ->
-                                    if isTouched start s p then
-                                        ( p, ds )
-                                    else
-                                        ( p, s )
-                                )
-                                dots
+                        newBending =
+                            List.map (\( p, s ) -> ( p, ds p )) bending
 
                         newBend =
                             Maybe.map (\b -> Bend b.start pos) bend
                     in
                         ( { model
-                            | dots = newDots
+                            | bending = newBending
                             , bend = newBend
                           }
                         , Cmd.none
@@ -164,11 +161,13 @@ update msg ({ window, mouse, dots, bend } as model) =
 
         ClickEnd pos ->
             let
-                newBend =
-                    Nothing
+                newOthers =
+                    bending ++ others
             in
                 ( { model
-                    | bend = newBend
+                    | bend = Nothing
+                    , bending = []
+                    , others = newOthers
                   }
                 , Cmd.none
                 )
@@ -195,11 +194,11 @@ isTouched element s { x, y } =
 
 
 view : Model -> Element
-view ({ window, dots } as model) =
+view ({ window, bending, others } as model) =
     collage
         window.width
         window.height
-        (List.map viewDot dots)
+        (List.map viewDot (bending ++ others))
 
 
 viewDot : ( Position, Int ) -> Form
