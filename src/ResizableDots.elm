@@ -1,4 +1,4 @@
-module Waves exposing (..)
+module ResizableDots exposing (..)
 
 import Collage exposing (Form, circle, collage, filled, move)
 import Color

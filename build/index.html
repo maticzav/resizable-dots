@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="UTF-8"><title>Waves</title><style>html,head,body { padding:0; margin:0; }
+<html><head><meta charset="UTF-8"><title>ResizableDots</title><style>html,head,body { padding:0; margin:0; }
 body { font-family: calibri, helvetica, arial, sans-serif; }</style><script type="text/javascript">
 (function() {
 'use strict';
@@ -11407,7 +11407,7 @@ var _evancz$elm_graphics$Collage$ngon = F2(
 				f,
 				A2(_elm_lang$core$List$range, 0, n - 1)));
 	});
-var _user$project$Waves$viewDot = function (_p0) {
+var _user$project$ResizableDots$viewDot = function (_p0) {
 	var _p1 = _p0;
 	return A2(
 		_evancz$elm_graphics$Collage$move,
@@ -11422,127 +11422,185 @@ var _user$project$Waves$viewDot = function (_p0) {
 			_evancz$elm_graphics$Collage$circle(
 				_elm_lang$core$Basics$toFloat(_p1._1))));
 };
-var _user$project$Waves$view = function (_p2) {
+var _user$project$ResizableDots$view = function (_p2) {
 	var _p3 = _p2;
 	var _p4 = _p3.window;
 	return A3(
 		_evancz$elm_graphics$Collage$collage,
 		_p4.width,
 		_p4.height,
-		A2(_elm_lang$core$List$map, _user$project$Waves$viewDot, _p3.dots));
+		A2(
+			_elm_lang$core$List$map,
+			_user$project$ResizableDots$viewDot,
+			A2(_elm_lang$core$Basics_ops['++'], _p3.bending, _p3.others)));
 };
-var _user$project$Waves$fixPosition = F3(
-	function (_p6, msg, _p5) {
-		var _p7 = _p6;
-		var _p8 = _p5;
-		return msg(
-			{x: _p8.x - ((_p7.width / 2) | 0), y: ((_p7.height / 2) | 0) - _p8.y});
+var _user$project$ResizableDots$isTouched = F3(
+	function (element, s, _p5) {
+		var _p6 = _p5;
+		var n = _p6.y - element.y;
+		var m = _p6.x - element.x;
+		return _elm_lang$core$Native_Utils.cmp(
+			function (_p7) {
+				return _elm_lang$core$Basics$sqrt(
+					_elm_lang$core$Basics$toFloat(_p7));
+			}((m * m) + (n * n)),
+			_elm_lang$core$Basics$toFloat(s)) < 1;
 	});
-var _user$project$Waves$Model = F4(
-	function (a, b, c, d) {
-		return {window: a, mouse: b, dots: c, bend: d};
-	});
-var _user$project$Waves$Bend = F3(
-	function (a, b, c) {
-		return {start: a, current: b, st: c};
-	});
-var _user$project$Waves$update = F2(
-	function (msg, _p9) {
+var _user$project$ResizableDots$fixPosition = F3(
+	function (_p9, msg, _p8) {
 		var _p10 = _p9;
-		var _p19 = _p10;
-		var _p18 = _p10.dots;
-		var _p17 = _p10.bend;
-		var _p11 = msg;
-		switch (_p11.ctor) {
+		var _p11 = _p8;
+		return msg(
+			{x: _p11.x - ((_p10.width / 2) | 0), y: ((_p10.height / 2) | 0) - _p11.y});
+	});
+var _user$project$ResizableDots$Model = F4(
+	function (a, b, c, d) {
+		return {window: a, others: b, bending: c, bend: d};
+	});
+var _user$project$ResizableDots$Bend = F2(
+	function (a, b) {
+		return {start: a, current: b};
+	});
+var _user$project$ResizableDots$update = F2(
+	function (msg, _p12) {
+		var _p13 = _p12;
+		var _p28 = _p13.others;
+		var _p27 = _p13;
+		var _p26 = _p13.bending;
+		var _p25 = _p13.bend;
+		var _p14 = msg;
+		switch (_p14.ctor) {
 			case 'Window':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
-						_p19,
-						{window: _p11._0}),
+						_p27,
+						{window: _p14._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'ClickStart':
-				var _p12 = _p11._0;
+				var _p18 = _p14._0;
 				var newBend = _elm_lang$core$Maybe$Just(
-					A3(_user$project$Waves$Bend, _p12, _p12, _p12));
-				var newDots = {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: _p12, _1: 0},
-					_1: _p18
-				};
+					A2(_user$project$ResizableDots$Bend, _p18, _p18));
+				var newBending = function () {
+					var _p17 = A2(
+						_elm_lang$core$List$filter,
+						function (_p15) {
+							var _p16 = _p15;
+							return A3(_user$project$ResizableDots$isTouched, _p16._0, _p16._1, _p18);
+						},
+						_p28);
+					if (_p17.ctor === '[]') {
+						return {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: _p18, _1: 0},
+							_1: {ctor: '[]'}
+						};
+					} else {
+						return _p17;
+					}
+				}();
+				var newOthers = A2(
+					_elm_lang$core$List$filter,
+					function (o) {
+						return !A2(
+							_elm_lang$core$List$any,
+							F2(
+								function (x, y) {
+									return _elm_lang$core$Native_Utils.eq(x, y);
+								})(o),
+							newBending);
+					},
+					_p28);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
-						_p19,
-						{dots: newDots, bend: newBend}),
+						_p27,
+						{others: newOthers, bending: newBending, bend: newBend}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'ClickAt':
-				var _p13 = _p17;
-				if (_p13.ctor === 'Just') {
+				var _p19 = _p25;
+				if (_p19.ctor === 'Just') {
+					var _p24 = _p19._0.current;
 					var newBend = A2(
 						_elm_lang$core$Maybe$map,
 						function (b) {
-							return A3(_user$project$Waves$Bend, b.start, _p11._0, b.st);
+							return A2(_user$project$ResizableDots$Bend, b.start, _p14._0);
 						},
-						_p17);
-					var ds = _p13._0.current.y - _p13._0.start.y;
-					var newDots = A2(
+						_p25);
+					var ds = function (st) {
+						var n = _p24.y - st.y;
+						var m = _p24.x - st.x;
+						return function (_p20) {
+							return _elm_lang$core$Basics$round(
+								_elm_lang$core$Basics$sqrt(
+									_elm_lang$core$Basics$toFloat(_p20)));
+						}((m * m) + (n * n));
+					};
+					var newBending = A2(
 						_elm_lang$core$List$map,
-						function (_p14) {
-							var _p15 = _p14;
-							var _p16 = _p15._0;
-							return _elm_lang$core$Native_Utils.eq(_p16, _p13._0.st) ? {ctor: '_Tuple2', _0: _p16, _1: ds} : {ctor: '_Tuple2', _0: _p16, _1: _p15._1};
+						function (_p21) {
+							var _p22 = _p21;
+							var _p23 = _p22._0;
+							return {
+								ctor: '_Tuple2',
+								_0: _p23,
+								_1: ds(_p23)
+							};
 						},
-						_p18);
+						_p26);
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
-							_p19,
-							{dots: newDots, bend: newBend}),
+							_p27,
+							{bending: newBending, bend: newBend}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
-					return {ctor: '_Tuple2', _0: _p19, _1: _elm_lang$core$Platform_Cmd$none};
+					return {ctor: '_Tuple2', _0: _p27, _1: _elm_lang$core$Platform_Cmd$none};
 				}
 			default:
-				var newBend = _elm_lang$core$Maybe$Nothing;
+				var newOthers = A2(_elm_lang$core$Basics_ops['++'], _p26, _p28);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
-						_p19,
-						{bend: newBend}),
+						_p27,
+						{
+							bend: _elm_lang$core$Maybe$Nothing,
+							bending: {ctor: '[]'},
+							others: newOthers
+						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
-var _user$project$Waves$ClickEnd = function (a) {
+var _user$project$ResizableDots$ClickEnd = function (a) {
 	return {ctor: 'ClickEnd', _0: a};
 };
-var _user$project$Waves$ClickAt = function (a) {
+var _user$project$ResizableDots$ClickAt = function (a) {
 	return {ctor: 'ClickAt', _0: a};
 };
-var _user$project$Waves$ClickStart = function (a) {
+var _user$project$ResizableDots$ClickStart = function (a) {
 	return {ctor: 'ClickStart', _0: a};
 };
-var _user$project$Waves$Window = function (a) {
+var _user$project$ResizableDots$Window = function (a) {
 	return {ctor: 'Window', _0: a};
 };
-var _user$project$Waves$subscriptions = function (_p20) {
-	var _p21 = _p20;
-	var _p23 = _p21.window;
-	var _p22 = _p21.bend;
-	if (_p22.ctor === 'Just') {
+var _user$project$ResizableDots$subscriptions = function (_p29) {
+	var _p30 = _p29;
+	var _p32 = _p30.window;
+	var _p31 = _p30.bend;
+	if (_p31.ctor === 'Just') {
 		return _elm_lang$core$Platform_Sub$batch(
 			{
 				ctor: '::',
 				_0: _elm_lang$mouse$Mouse$moves(
-					A2(_user$project$Waves$fixPosition, _p23, _user$project$Waves$ClickAt)),
+					A2(_user$project$ResizableDots$fixPosition, _p32, _user$project$ResizableDots$ClickAt)),
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$mouse$Mouse$ups(
-						A2(_user$project$Waves$fixPosition, _p23, _user$project$Waves$ClickEnd)),
+						A2(_user$project$ResizableDots$fixPosition, _p32, _user$project$ResizableDots$ClickEnd)),
 					_1: {ctor: '[]'}
 				}
 			});
@@ -11550,40 +11608,40 @@ var _user$project$Waves$subscriptions = function (_p20) {
 		return _elm_lang$core$Platform_Sub$batch(
 			{
 				ctor: '::',
-				_0: _elm_lang$window$Window$resizes(_user$project$Waves$Window),
+				_0: _elm_lang$window$Window$resizes(_user$project$ResizableDots$Window),
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$mouse$Mouse$downs(
-						A2(_user$project$Waves$fixPosition, _p23, _user$project$Waves$ClickStart)),
+						A2(_user$project$ResizableDots$fixPosition, _p32, _user$project$ResizableDots$ClickStart)),
 					_1: {ctor: '[]'}
 				}
 			});
 	}
 };
-var _user$project$Waves$init = function () {
-	var cmds = A2(_elm_lang$core$Task$perform, _user$project$Waves$Window, _elm_lang$window$Window$size);
+var _user$project$ResizableDots$init = function () {
+	var cmds = A2(_elm_lang$core$Task$perform, _user$project$ResizableDots$Window, _elm_lang$window$Window$size);
 	var model = {
 		window: A2(_elm_lang$window$Window$Size, 0, 0),
-		mouse: A2(_elm_lang$mouse$Mouse$Position, 0, 0),
-		dots: {ctor: '[]'},
+		others: {ctor: '[]'},
+		bending: {ctor: '[]'},
 		bend: _elm_lang$core$Maybe$Nothing
 	};
 	return {ctor: '_Tuple2', _0: model, _1: cmds};
 }();
-var _user$project$Waves$main = _elm_lang$html$Html$program(
+var _user$project$ResizableDots$main = _elm_lang$html$Html$program(
 	{
-		init: _user$project$Waves$init,
-		update: _user$project$Waves$update,
-		subscriptions: _user$project$Waves$subscriptions,
-		view: function (_p24) {
+		init: _user$project$ResizableDots$init,
+		update: _user$project$ResizableDots$update,
+		subscriptions: _user$project$ResizableDots$subscriptions,
+		view: function (_p33) {
 			return _evancz$elm_graphics$Element$toHtml(
-				_user$project$Waves$view(_p24));
+				_user$project$ResizableDots$view(_p33));
 		}
 	})();
 var Elm = {};
-Elm['Waves'] = Elm['Waves'] || {};
-if (typeof _user$project$Waves$main !== 'undefined') {
-    _user$project$Waves$main(Elm['Waves'], 'Waves', undefined);
+Elm['ResizableDots'] = Elm['ResizableDots'] || {};
+if (typeof _user$project$ResizableDots$main !== 'undefined') {
+    _user$project$ResizableDots$main(Elm['ResizableDots'], 'ResizableDots', undefined);
 }
 
 if (typeof define === "function" && define['amd'])
@@ -11615,4 +11673,4 @@ for (var publicModule in Elm)
 }
 
 }).call(this);
-</script></head><body><script type="text/javascript">Elm.Waves.fullscreen()</script></body></html>
+</script></head><body><script type="text/javascript">Elm.ResizableDots.fullscreen()</script></body></html>

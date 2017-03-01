@@ -1,18 +1,19 @@
 {
   "name": "resizable-dots",
   "version": "1.0.0",
-  "description": "2D space time hand interection.",
+  "description": "Simple app written in elm-lang.",
   "main": "server.js",
-  "repository": "https://github.com/maticzav/waves",
+  "repository": "https://github.com/maticzav/resizable-dots",
   "author": "Matic Zavadlal",
   "license": "MIT",
   "scripts": {
     "start": "node server",
-    "dev": "elm reactor",
-    "build": "elm package install -y && elm make src/ResizableDots.elm --output build/index.html"
+    "dev": "elm reactor"
+  },
+  "now": {
+    "alias": ["resizable-dots"]
   },
   "dependencies": {
-    "elm": "^0.18.0",
     "express": "^4.14.1"
   }
 }
